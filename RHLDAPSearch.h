@@ -15,6 +15,14 @@
 
 #import "ldap.h"
 
+typedef enum RHSearchScope { 
+RH_LDAP_SCOPE_BASE, RH_LDAP_SCOPE_BASEOBJECT,
+RH_LDAP_SCOPE_ONELEVEL, RH_LDAP_SCOPE_ONE,
+RH_LDAP_SCOPE_SUBTREE, RH_LDAP_SCOPE_SUB,
+RH_LDAP_SCOPE_SUBORDINATE, RH_LDAP_SCOPE_CHILDERN,
+RH_LDAP_SCOPE_DEFAULT
+} RHLDAPSearchScope;
+
 @interface RHLDAPSearch : NSObject {
 	LDAP *_ldap_context;
 	NSString *_url;
@@ -22,6 +30,6 @@
 }
 
 - (id)initWithURL:(NSString *)url andPort:(uint)port;
-- (NSArray *)searchWithQuery:(NSString *)query error:(NSError **)theError;
+- (NSArray *)searchWithQuery:(NSString *)query withinBase:(NSString *)base usingScope:(RHLDAPSearchScope)scope error:(NSError **)theError;
 
 @end
