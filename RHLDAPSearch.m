@@ -92,9 +92,10 @@
 
 - (NSArray *)searchWithQuery:(NSString *)query withinBase:(NSString *)base usingScope:(RHLDAPSearchScope)scope error:(NSError **)theError
 {
-	int ldap_error;
-	LDAPMessage *res, *msg;
-	int ldap_scope;
+	int ldap_error, ldap_scope;
+	char *attribute;
+	LDAPMessage *result, *message;
+	BerElement *binary_data;
 	
 	if (!_initialized) {
 		if ( [self initializeLDAP:theError] != LDAP_SUCCESS )
@@ -106,13 +107,25 @@
 	ldap_scope = [self createLDAPScopeFromRHScope:scope];
 	ldap_error = ldap_search_ext_s(_ldap_context, [base cStringUsingEncoding:NSASCIIStringEncoding],
 								   ldap_scope, [query cStringUsingEncoding:NSASCIIStringEncoding],
-								   NULL, 0, NULL, NULL, NULL, LDAP_NO_LIMIT, &res);
+								   NULL, 0, NULL, NULL, NULL, LDAP_NO_LIMIT, &result);
 
 	if (ldap_error != LDAP_SUCCESS) {
 		NSString *error_string = [NSString stringWithCString:ldap_err2string(ldap_error)];
 		NSDictionary *error_dict = [NSDictionary dictionaryWithObject:error_string forKey:@"err_msg"];
 		*theError = [[[NSError alloc] initWithDomain:NSPOSIXErrorDomain code:ldap_error userInfo:error_dict] autorelease];
 		return nil;
+	}
+	
+	for ( message = ldap_first_message(_ldap_context, result); message != NULL;
+		 message = ldap_next_message(_ldap_context, result) ) {
+		
+		if ( ldap_msgtype(message) != LDAP_RES_SEARCH_ENTRY )
+			continue;
+
+		for ( attribute = ldap_first_attribute(_ldap_context, result, &binary_data);
+			 attribute != NULL; attribute = ldap_next_attribute(_ldap_context, result, binary_data) ) {
+			
+		}
 	}
 }
 
