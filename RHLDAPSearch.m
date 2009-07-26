@@ -92,10 +92,14 @@
 
 - (NSArray *)searchWithQuery:(NSString *)query withinBase:(NSString *)base usingScope:(RHLDAPSearchScope)scope error:(NSError **)theError
 {
-	int ldap_error, ldap_scope;
+	int ldap_error, ldap_scope, i, num_entries, num_references;
 	char *attribute;
+	char **values;
 	LDAPMessage *result, *message;
-	BerElement *binary_data;
+
+	NSArray *search_results = nil;
+	BerElement		*binary_data = NULL;
+	struct berval		bv, *bvals, **bvp = &bvals;
 	
 	if (!_initialized) {
 		if ( [self initializeLDAP:theError] != LDAP_SUCCESS )
@@ -116,16 +120,34 @@
 		return nil;
 	}
 	
+	num_entries = ldap_count_entries(_ldap_context, result);
+	num_references = ldap_count_references(_ldap_context, result);
+	
 	for ( message = ldap_first_message(_ldap_context, result); message != NULL;
-		 message = ldap_next_message(_ldap_context, result) ) {
+		 message = ldap_next_message(_ldap_context, message) ) {
 		
-		if ( ldap_msgtype(message) != LDAP_RES_SEARCH_ENTRY )
+		int mesg_type = ldap_msgtype(message);
+		if ( mesg_type != LDAP_RES_SEARCH_ENTRY )
 			continue;
+		
+		ldap_error = ldap_get_dn_ber(_ldap_context, message, &binary_data, &bv);
 
-		for ( attribute = ldap_first_attribute(_ldap_context, result, &binary_data);
-			 attribute != NULL; attribute = ldap_next_attribute(_ldap_context, result, binary_data) ) {
+		for ( ldap_error = ldap_get_attribute_ber(_ldap_context, message, binary_data, &bv, bvp); ldap_error == LDAP_SUCCESS;
+			 ldap_error = ldap_get_attribute_ber(_ldap_context, message, binary_data, &bv, bvp) ) {
+
+			if (bv.bv_val == NULL)
+				break;
 			
+			for (i=0; bvals[i].bv_val != NULL; i++) {
+				NSLog(@"%s : %s", bv.bv_val, bvals[i].bv_val);
+			}
 		}
+		
+		if ( bvals )
+			ber_memfree( bvals );
+
+		if ( binary_data )
+			ber_free(binary_data, 0);
 	}
 }
 
