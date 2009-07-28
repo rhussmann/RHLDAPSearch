@@ -10,7 +10,7 @@
 
 @implementation RHLDAPSearch
 
-- (id)initWithURL:(NSString *)url andPort:(uint)port
+- (id)initWithURL:(NSString *)url
 {
 	self = [super init];
 	if (self) {
@@ -25,7 +25,7 @@
 		//
 		// Better safe than sorry...
 		//
-		_url = [NSString stringWithString:url];
+		_url = [[NSString stringWithString:url] retain];
 		_initialized = NO;
 	}
 
@@ -90,16 +90,19 @@
   return ldap_scope;
 }
 
+// TODO: Need to create objects in a way in this method such that
+// if something in LDAP fails, everything is properly cleaned up.
+// That probably relies a lot on using the pre-autoreleased methods
+// for generating objects
+
 - (NSArray *)searchWithQuery:(NSString *)query withinBase:(NSString *)base usingScope:(RHLDAPSearchScope)scope error:(NSError **)theError
 {
-	int ldap_error, ldap_scope, i, num_entries, num_references;
-	char *attribute;
-	char **values;
+	int ldap_error, ldap_scope, i;
 	LDAPMessage *result, *message;
-
-	NSArray *search_results = nil;
-	BerElement		*binary_data = NULL;
-	struct berval		bv, *bvals, **bvp = &bvals;
+	NSMutableArray *search_results = nil;
+	NSMutableDictionary *entry = nil;
+	BerElement *binary_data = NULL;
+	struct berval bv, *bvals, **bvp = &bvals;
 	
 	if (!_initialized) {
 		if ( [self initializeLDAP:theError] != LDAP_SUCCESS )
@@ -107,6 +110,10 @@
 		
 		_initialized = YES;
 	}
+	
+	// TODO: Should probably clean this up such that NSMutableArray gets alloc'd
+	// with the exact number of entries it needs
+	search_results = [[NSMutableArray alloc] initWithCapacity:10];
 
 	ldap_scope = [self createLDAPScopeFromRHScope:scope];
 	ldap_error = ldap_search_ext_s(_ldap_context, [base cStringUsingEncoding:NSASCIIStringEncoding],
@@ -120,9 +127,6 @@
 		return nil;
 	}
 	
-	num_entries = ldap_count_entries(_ldap_context, result);
-	num_references = ldap_count_references(_ldap_context, result);
-	
 	for ( message = ldap_first_message(_ldap_context, result); message != NULL;
 		 message = ldap_next_message(_ldap_context, message) ) {
 		
@@ -131,16 +135,30 @@
 			continue;
 		
 		ldap_error = ldap_get_dn_ber(_ldap_context, message, &binary_data, &bv);
+		
+		// TODO: Should probably clean this up such that NSMutableDictionary gets alloc'd
+		// with the exact number of entries it needs
+		entry = [[NSMutableDictionary alloc] initWithCapacity:10];
 
 		for ( ldap_error = ldap_get_attribute_ber(_ldap_context, message, binary_data, &bv, bvp); ldap_error == LDAP_SUCCESS;
 			 ldap_error = ldap_get_attribute_ber(_ldap_context, message, binary_data, &bv, bvp) ) {
 
 			if (bv.bv_val == NULL)
 				break;
-			
+
+			// TODO: Should probably clean this up such that NSMutableArray gets alloc'd
+			// with the exact number of entries it needs
+			NSMutableArray *attributes = [[NSMutableArray alloc] initWithCapacity:10];
+
 			for (i=0; bvals[i].bv_val != NULL; i++) {
+				
+				// TODO: comment out this NSLog statement in release builds...
 				NSLog(@"%s : %s", bv.bv_val, bvals[i].bv_val);
+				[attributes addObject:[NSString stringWithCString:bvals[i].bv_val]];
 			}
+
+			[entry setObject:[NSArray arrayWithArray:attributes] forKey:[NSString stringWithCString:bv.bv_val]];
+			[attributes release];
 		}
 		
 		if ( bvals )
@@ -148,7 +166,30 @@
 
 		if ( binary_data )
 			ber_free(binary_data, 0);
+		
+		[search_results addObject:[NSDictionary dictionaryWithDictionary:entry]];
+		[entry release];
 	}
+	
+	ldap_msgfree(result);
+	
+	NSArray *return_results = [NSArray arrayWithArray:search_results];
+	[search_results release];
+	return return_results;
 }
+
+- (void)dealloc
+{
+	if ( _initialized ) {
+		[_url release];
+		
+		ldap_unbind_ext(_ldap_context, NULL, NULL);
+		_ldap_context = NULL;
+		_initialized = NO;
+	}
+		
+	[super dealloc];
+}
+
 
 @end

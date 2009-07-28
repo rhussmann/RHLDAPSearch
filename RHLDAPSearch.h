@@ -29,7 +29,7 @@ RH_LDAP_SCOPE_DEFAULT
 	bool _initialized;
 }
 
-- (id)initWithURL:(NSString *)url andPort:(uint)port;
+- (id)initWithURL:(NSString *)url;
 - (NSArray *)searchWithQuery:(NSString *)query withinBase:(NSString *)base usingScope:(RHLDAPSearchScope)scope error:(NSError **)theError;
 
 @end
