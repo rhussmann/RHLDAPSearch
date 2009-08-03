@@ -12,9 +12,9 @@
 		8D11072D0486CEB800E47090 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 29B97316FDCFA39411CA2CEA /* main.m */; settings = {ATTRIBUTES = (); }; };
 		8D11072F0486CEB800E47090 /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1058C7A1FEA54F0111CA2CBB /* Cocoa.framework */; };
 		F489CB1E100BC92500C65F4E /* testCode.c in Sources */ = {isa = PBXBuildFile; fileRef = F489CB1D100BC92500C65F4E /* testCode.c */; };
-		F489CB2B100BCB0300C65F4E /* liblber.a in Frameworks */ = {isa = PBXBuildFile; fileRef = F489CB2A100BCB0300C65F4E /* liblber.a */; };
 		F489CB42100BCDB600C65F4E /* RHAppController.m in Sources */ = {isa = PBXBuildFile; fileRef = F489CB41100BCDB600C65F4E /* RHAppController.m */; };
 		F489CB5D10123CD200C65F4E /* RHLDAPSearch.m in Sources */ = {isa = PBXBuildFile; fileRef = F489CB5C10123CD200C65F4E /* RHLDAPSearch.m */; };
+		F49BCC1E1020C0A100C5AC05 /* libldap.a in Frameworks */ = {isa = PBXBuildFile; fileRef = F49BCC1D1020C0A100C5AC05 /* libldap.a */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -29,12 +29,12 @@
 		8D1107310486CEB800E47090 /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		8D1107320486CEB800E47090 /* LDAPTest.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = LDAPTest.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		F489CB1D100BC92500C65F4E /* testCode.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = testCode.c; sourceTree = "<group>"; };
-		F489CB2A100BCB0300C65F4E /* liblber.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; path = liblber.a; sourceTree = "<group>"; };
 		F489CB40100BCDB600C65F4E /* RHAppController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = RHAppController.h; sourceTree = "<group>"; };
 		F489CB41100BCDB600C65F4E /* RHAppController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = RHAppController.m; sourceTree = "<group>"; };
 		F489CB5B10123CD200C65F4E /* RHLDAPSearch.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = RHLDAPSearch.h; sourceTree = "<group>"; };
 		F489CB5C10123CD200C65F4E /* RHLDAPSearch.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = RHLDAPSearch.m; sourceTree = "<group>"; };
 		F489CBB0101242C700C65F4E /* ldap.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ldap.h; sourceTree = "<group>"; };
+		F49BCC1D1020C0A100C5AC05 /* libldap.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; path = libldap.a; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -43,7 +43,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				8D11072F0486CEB800E47090 /* Cocoa.framework in Frameworks */,
-				F489CB2B100BCB0300C65F4E /* liblber.a in Frameworks */,
+				F49BCC1E1020C0A100C5AC05 /* libldap.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -102,8 +102,8 @@
 		29B97315FDCFA39411CA2CEA /* Other Sources */ = {
 			isa = PBXGroup;
 			children = (
+				F49BCC1D1020C0A100C5AC05 /* libldap.a */,
 				F489CBB0101242C700C65F4E /* ldap.h */,
-				F489CB2A100BCB0300C65F4E /* liblber.a */,
 				F489CB1D100BC92500C65F4E /* testCode.c */,
 				32CA4F630368D1EE00C91783 /* LDAPTest_Prefix.pch */,
 				29B97316FDCFA39411CA2CEA /* main.m */,

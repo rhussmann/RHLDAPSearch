@@ -6,12 +6,21 @@
 //  Copyright 2009 Ricky Hussmann. All rights reserved.
 //
 
+// This code was built against OpenLDAP 2.4.16.
+// For support of iPhone OS 3.0, the library should
+// be configured in the following manner:
+//
+// ./configure --without-kerberos --without-tls --disable-kpasswd --without-cyrus-sasl --disable-slapd --disable-backends --disable-overlays --without-gssapi
+// 
+// Configuring as above will leave out support for
+// libraries the iPhone does not natively provide, nor
+// needed for talking to WVUs LDAP service.
+
 // TODO: Determine if there is a way to query an LDAP
 // context for it's associated URL and port...
 
-// TODO: Autorelease the created NSError objects
-
-// TODO: Add LDAP error text to NSError dictionaries
+// TODO: Clean up memory leaks for failed and
+// successful searches
 
 #import "ldap.h"
 
