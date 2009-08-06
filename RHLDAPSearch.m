@@ -111,10 +111,6 @@
 		_initialized = YES;
 	}
 	
-	// TODO: Should probably clean this up such that NSMutableArray gets alloc'd
-	// with the exact number of entries it needs
-	search_results = [[NSMutableArray alloc] initWithCapacity:10];
-
 	ldap_scope = [self createLDAPScopeFromRHScope:scope];
 	ldap_error = ldap_search_ext_s(_ldap_context, [base cStringUsingEncoding:NSASCIIStringEncoding],
 								   ldap_scope, [query cStringUsingEncoding:NSASCIIStringEncoding],
@@ -126,6 +122,10 @@
 		*theError = [[[NSError alloc] initWithDomain:NSPOSIXErrorDomain code:ldap_error userInfo:error_dict] autorelease];
 		return nil;
 	}
+	
+	// TODO: Should probably clean this up such that NSMutableArray gets alloc'd
+	// with the exact number of entries it needs
+	search_results = [[NSMutableArray alloc] initWithCapacity:10];
 	
 	for ( message = ldap_first_message(_ldap_context, result); message != NULL;
 		 message = ldap_next_message(_ldap_context, message) ) {
@@ -159,10 +159,11 @@
 
 			[entry setObject:[NSArray arrayWithArray:attributes] forKey:[NSString stringWithCString:bv.bv_val]];
 			[attributes release];
+
+			if ( bvals )
+				ber_memfree( bvals );
 		}
 		
-		if ( bvals )
-			ber_memfree( bvals );
 
 		if ( binary_data )
 			ber_free(binary_data, 0);
