@@ -11,6 +11,7 @@
 		8D11072B0486CEB800E47090 /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = 089C165CFE840E0CC02AAC07 /* InfoPlist.strings */; };
 		8D11072D0486CEB800E47090 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 29B97316FDCFA39411CA2CEA /* main.m */; settings = {ATTRIBUTES = (); }; };
 		8D11072F0486CEB800E47090 /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1058C7A1FEA54F0111CA2CBB /* Cocoa.framework */; };
+		F44939CA103237F3001CB908 /* LICENSE.txt in Resources */ = {isa = PBXBuildFile; fileRef = F44939C9103237F3001CB908 /* LICENSE.txt */; };
 		F489CB1E100BC92500C65F4E /* testCode.c in Sources */ = {isa = PBXBuildFile; fileRef = F489CB1D100BC92500C65F4E /* testCode.c */; };
 		F489CB42100BCDB600C65F4E /* RHAppController.m in Sources */ = {isa = PBXBuildFile; fileRef = F489CB41100BCDB600C65F4E /* RHAppController.m */; };
 		F489CB5D10123CD200C65F4E /* RHLDAPSearch.m in Sources */ = {isa = PBXBuildFile; fileRef = F489CB5C10123CD200C65F4E /* RHLDAPSearch.m */; };
@@ -28,6 +29,7 @@
 		32CA4F630368D1EE00C91783 /* LDAPTest_Prefix.pch */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = LDAPTest_Prefix.pch; sourceTree = "<group>"; };
 		8D1107310486CEB800E47090 /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		8D1107320486CEB800E47090 /* LDAPTest.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = LDAPTest.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		F44939C9103237F3001CB908 /* LICENSE.txt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = LICENSE.txt; sourceTree = "<group>"; };
 		F489CB1D100BC92500C65F4E /* testCode.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = testCode.c; sourceTree = "<group>"; };
 		F489CB40100BCDB600C65F4E /* RHAppController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = RHAppController.h; sourceTree = "<group>"; };
 		F489CB41100BCDB600C65F4E /* RHAppController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = RHAppController.m; sourceTree = "<group>"; };
@@ -53,6 +55,7 @@
 		080E96DDFE201D6D7F000001 /* Classes */ = {
 			isa = PBXGroup;
 			children = (
+				F44939C9103237F3001CB908 /* LICENSE.txt */,
 				F489CB40100BCDB600C65F4E /* RHAppController.h */,
 				F489CB41100BCDB600C65F4E /* RHAppController.m */,
 				F489CB5B10123CD200C65F4E /* RHLDAPSearch.h */,
@@ -175,6 +178,7 @@
 			files = (
 				8D11072B0486CEB800E47090 /* InfoPlist.strings in Resources */,
 				1DDD58160DA1D0A300B32029 /* MainMenu.xib in Resources */,
+				F44939CA103237F3001CB908 /* LICENSE.txt in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
