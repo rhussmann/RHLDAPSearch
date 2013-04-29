@@ -105,6 +105,10 @@
 	
   return ldap_scope;
 }
+- (NSArray *)searchWithQuery:(NSString *)query withinBase:(NSString *)base usingScope:(RHLDAPSearchScope)scope error:(NSError **)theError
+{
+	return [self searchWithQuery:query withinBase:base usingScope:scope error:theError attributes:nil];
+}
 
 // TODO: Need to create objects in a way in this method such that
 // if something in LDAP fails, everything is properly cleaned up.
@@ -211,6 +215,10 @@
 }
 -(char **)cStringArrayFromNSArray:(NSArray *)array
 {
+	if (!array || ![array count])
+	{
+		return NULL; //this would be the case for an empty / null array, in which we want it to fail correctly
+	}
 	NSUInteger theCount = [array count]; //BLAH!
 	char **myCStringArray = (char**)malloc(sizeof(char*)*theCount + 1);
 	for (int i = 0; i< theCount; i++) {
