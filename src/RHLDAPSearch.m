@@ -132,9 +132,11 @@
 	ldap_error = ldap_search_ext_s(_ldap_context, [base cStringUsingEncoding:NSASCIIStringEncoding],
 								   ldap_scope, [query cStringUsingEncoding:NSASCIIStringEncoding],
 								   cAttributes, 0, NULL, NULL, NULL, LDAP_NO_LIMIT, &result);
-
+	//free the attributes!
+	free(cAttributes);
+	
 	if (ldap_error != LDAP_SUCCESS) {
-		NSString *error_string = [NSString stringWithCString:ldap_err2string(ldap_error)];
+		NSString *error_string = [NSString stringWithCString:ldap_err2string(ldap_error) encoding:NSUTF8StringEncoding];
 		NSDictionary *error_dict = [NSDictionary dictionaryWithObject:error_string forKey:@"err_msg"];
 		*theError = [[[NSError alloc] initWithDomain:NSPOSIXErrorDomain code:ldap_error userInfo:error_dict] autorelease];
 		return nil;
@@ -172,9 +174,9 @@
 				// TODO: comment out this NSLog statement in release builds...
 				NSLog(@"%s : %s", bv.bv_val, bvals[i].bv_val);
 				NSData *data;
-				if ([[NSString stringWithCString:bv.bv_val encoding:NSUTF8StringEncoding] rangeOfString:@"binary"].location == NSNotFound)
+				if ([[NSString stringWithCString:bv.bv_val encoding:NSUTF8StringEncoding] rangeOfString:@";binary"].location == NSNotFound)
 				{
-					[attributes addObject:[NSString stringWithCString:bvals[i].bv_val]];
+					[attributes addObject:[NSString stringWithCString:bvals[i].bv_val encoding:NSUTF8StringEncoding]];
 				}
 				else
 				{
@@ -186,7 +188,7 @@
 				
 			}
 
-			[entry setObject:[NSArray arrayWithArray:attributes] forKey:[NSString stringWithCString:bv.bv_val]];
+			[entry setObject:[NSArray arrayWithArray:attributes] forKey:[NSString stringWithCString:bv.bv_val encoding:NSUTF8StringEncoding]];
 			[attributes release];
 
 			if ( bvals )
@@ -209,13 +211,14 @@
 }
 -(char **)cStringArrayFromNSArray:(NSArray *)array
 {
-	char **myCStringArray = (char**)malloc(sizeof(char*)*[array count] + 1);
-	for (int i = 0; i< [array count]; i++) {
+	NSUInteger theCount = [array count]; //BLAH!
+	char **myCStringArray = (char**)malloc(sizeof(char*)*theCount + 1);
+	for (int i = 0; i< theCount; i++) {
 		//just checking...
 		assert([[array objectAtIndex:i] isKindOfClass:[NSString class]]);
 		myCStringArray[i] = (char *)[[array objectAtIndex:i] UTF8String];
 	}
-	myCStringArray[[array count]] = NULL;
+	myCStringArray[theCount] = NULL;
 	return myCStringArray;
 }
 - (void)dealloc
