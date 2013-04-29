@@ -105,19 +105,24 @@
 	
   return ldap_scope;
 }
+- (NSArray *)searchWithQuery:(NSString *)query withinBase:(NSString *)base usingScope:(RHLDAPSearchScope)scope error:(NSError **)theError
+{
+	return [self searchWithQuery:query withinBase:base usingScope:scope error:theError attributes:nil];
+}
 
 // TODO: Need to create objects in a way in this method such that
 // if something in LDAP fails, everything is properly cleaned up.
 // That probably relies a lot on using the pre-autoreleased methods
 // for generating objects
 
-- (NSArray *)searchWithQuery:(NSString *)query withinBase:(NSString *)base usingScope:(RHLDAPSearchScope)scope error:(NSError **)theError
+- (NSArray *)searchWithQuery:(NSString *)query withinBase:(NSString *)base usingScope:(RHLDAPSearchScope)scope error:(NSError **)theError attributes:(NSArray *)attributes
 {
 	int ldap_error, ldap_scope, i;
 	LDAPMessage *result, *message;
 	NSMutableArray *search_results = nil;
 	NSMutableDictionary *entry = nil;
 	BerElement *binary_data = NULL;
+	char** cAttributes = [self cStringArrayFromNSArray:attributes];
 	struct berval bv, *bvals, **bvp = &bvals;
 	
 	if (!_initialized) {
@@ -130,10 +135,12 @@
 	ldap_scope = [self createLDAPScopeFromRHScope:scope];
 	ldap_error = ldap_search_ext_s(_ldap_context, [base cStringUsingEncoding:NSASCIIStringEncoding],
 								   ldap_scope, [query cStringUsingEncoding:NSASCIIStringEncoding],
-								   NULL, 0, NULL, NULL, NULL, LDAP_NO_LIMIT, &result);
-
+								   cAttributes, 0, NULL, NULL, NULL, LDAP_NO_LIMIT, &result);
+	//free the attributes!
+	free(cAttributes);
+	
 	if (ldap_error != LDAP_SUCCESS) {
-		NSString *error_string = [NSString stringWithCString:ldap_err2string(ldap_error)];
+		NSString *error_string = [NSString stringWithCString:ldap_err2string(ldap_error) encoding:NSUTF8StringEncoding];
 		NSDictionary *error_dict = [NSDictionary dictionaryWithObject:error_string forKey:@"err_msg"];
 		*theError = [[[NSError alloc] initWithDomain:NSPOSIXErrorDomain code:ldap_error userInfo:error_dict] autorelease];
 		return nil;
@@ -170,10 +177,22 @@
 				
 				// TODO: comment out this NSLog statement in release builds...
 				NSLog(@"%s : %s", bv.bv_val, bvals[i].bv_val);
-				[attributes addObject:[NSString stringWithCString:bvals[i].bv_val]];
+				NSData *data;
+				if ([[NSString stringWithCString:bv.bv_val encoding:NSUTF8StringEncoding] rangeOfString:@";binary"].location == NSNotFound)
+				{
+					[attributes addObject:[NSString stringWithCString:bvals[i].bv_val encoding:NSUTF8StringEncoding]];
+				}
+				else
+				{
+					data = [NSData dataWithBytes:bvals[i].bv_val length:bvals[i].bv_len];
+					[attributes addObject:data];
+				
+				}
+				
+				
 			}
 
-			[entry setObject:[NSArray arrayWithArray:attributes] forKey:[NSString stringWithCString:bv.bv_val]];
+			[entry setObject:[NSArray arrayWithArray:attributes] forKey:[NSString stringWithCString:bv.bv_val encoding:NSUTF8StringEncoding]];
 			[attributes release];
 
 			if ( bvals )
@@ -194,7 +213,22 @@
 	[search_results release];
 	return return_results;
 }
-
+-(char **)cStringArrayFromNSArray:(NSArray *)array
+{
+	if (!array || ![array count])
+	{
+		return NULL; //this would be the case for an empty / null array, in which we want it to fail correctly
+	}
+	NSUInteger theCount = [array count]; //BLAH!
+	char **myCStringArray = (char**)malloc(sizeof(char*)*theCount + 1);
+	for (int i = 0; i< theCount; i++) {
+		//just checking...
+		assert([[array objectAtIndex:i] isKindOfClass:[NSString class]]);
+		myCStringArray[i] = (char *)[[array objectAtIndex:i] UTF8String];
+	}
+	myCStringArray[theCount] = NULL;
+	return myCStringArray;
+}
 - (void)dealloc
 {
 	if ( _initialized ) {
