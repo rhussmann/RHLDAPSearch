@@ -53,6 +53,6 @@ RH_LDAP_SCOPE_DEFAULT
 }
 
 - (id)initWithURL:(NSString *)url;
-- (NSArray *)searchWithQuery:(NSString *)query withinBase:(NSString *)base usingScope:(RHLDAPSearchScope)scope error:(NSError **)theError;
+- (NSArray *)searchWithQuery:(NSString *)query withinBase:(NSString *)base usingScope:(RHLDAPSearchScope)scope error:(NSError **)theError attributes:(NSArray *) attributes;
 
 @end

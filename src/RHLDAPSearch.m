@@ -111,13 +111,14 @@
 // That probably relies a lot on using the pre-autoreleased methods
 // for generating objects
 
-- (NSArray *)searchWithQuery:(NSString *)query withinBase:(NSString *)base usingScope:(RHLDAPSearchScope)scope error:(NSError **)theError
+- (NSArray *)searchWithQuery:(NSString *)query withinBase:(NSString *)base usingScope:(RHLDAPSearchScope)scope error:(NSError **)theError attributes:(NSArray *)attributes
 {
 	int ldap_error, ldap_scope, i;
 	LDAPMessage *result, *message;
 	NSMutableArray *search_results = nil;
 	NSMutableDictionary *entry = nil;
 	BerElement *binary_data = NULL;
+	char** cAttributes = [self cStringArrayFromNSArray:attributes];
 	struct berval bv, *bvals, **bvp = &bvals;
 	
 	if (!_initialized) {
@@ -130,7 +131,7 @@
 	ldap_scope = [self createLDAPScopeFromRHScope:scope];
 	ldap_error = ldap_search_ext_s(_ldap_context, [base cStringUsingEncoding:NSASCIIStringEncoding],
 								   ldap_scope, [query cStringUsingEncoding:NSASCIIStringEncoding],
-								   NULL, 0, NULL, NULL, NULL, LDAP_NO_LIMIT, &result);
+								   cAttributes, 0, NULL, NULL, NULL, LDAP_NO_LIMIT, &result);
 
 	if (ldap_error != LDAP_SUCCESS) {
 		NSString *error_string = [NSString stringWithCString:ldap_err2string(ldap_error)];
@@ -170,7 +171,19 @@
 				
 				// TODO: comment out this NSLog statement in release builds...
 				NSLog(@"%s : %s", bv.bv_val, bvals[i].bv_val);
-				[attributes addObject:[NSString stringWithCString:bvals[i].bv_val]];
+				NSData *data;
+				if ([[NSString stringWithCString:bv.bv_val encoding:NSUTF8StringEncoding] rangeOfString:@"binary"].location == NSNotFound)
+				{
+					[attributes addObject:[NSString stringWithCString:bvals[i].bv_val]];
+				}
+				else
+				{
+					data = [NSData dataWithBytes:bvals[i].bv_val length:bvals[i].bv_len];
+					[attributes addObject:data];
+				
+				}
+				
+				
 			}
 
 			[entry setObject:[NSArray arrayWithArray:attributes] forKey:[NSString stringWithCString:bv.bv_val]];
@@ -194,7 +207,17 @@
 	[search_results release];
 	return return_results;
 }
-
+-(char **)cStringArrayFromNSArray:(NSArray *)array
+{
+	char **myCStringArray = (char**)malloc(sizeof(char*)*[array count] + 1);
+	for (int i = 0; i< [array count]; i++) {
+		//just checking...
+		assert([[array objectAtIndex:i] isKindOfClass:[NSString class]]);
+		myCStringArray[i] = (char *)[[array objectAtIndex:i] UTF8String];
+	}
+	myCStringArray[[array count]] = NULL;
+	return myCStringArray;
+}
 - (void)dealloc
 {
 	if ( _initialized ) {
